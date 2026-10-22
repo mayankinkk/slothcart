@@ -144,7 +144,7 @@ wins the product, not just the principles.
 
 ## Show your work
 
-- Repo: `<REPO_URL>` — MIT
+- Repo: https://github.com/mayankinkk/slothcart — MIT
 - Built with: `<DEVRAY_SESSION_LINK>` (agent session — full build process)
 - Stack: Python 3.14 stdlib, Ollama, `gemma3:4b` (open weights), 25 unit tests
   (`python3 -m unittest discover -s tests`), Apple M2 / 16 GB

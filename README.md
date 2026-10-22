@@ -74,7 +74,7 @@ Requirements:
 Then:
 
 ```
-git clone <your-repo-url> slothcart
+git clone https://github.com/mayankinkk/slothcart.git slothcart
 cd slothcart
 pip install -e .
 ```
