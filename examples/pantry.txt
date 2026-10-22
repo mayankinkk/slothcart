@@ -1,0 +1,5 @@
+# What we already stock - slothcart skips these
+tomatoes
+cheese
+yogurt
+bread
