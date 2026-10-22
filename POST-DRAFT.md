@@ -1,6 +1,6 @@
 ---
 title: "slothcart: a fridge photo → grocery list that never phones home"
-published: false
+published: true
 description: "Hacktoberfest Week 3 — an offline, zero-dependency CLI that turns a photo of your fridge into a pantry-aware grocery list using a local open-weight vision model."
 tags: hacktoberfest, ai, opensource, python
 ---
@@ -148,7 +148,6 @@ wins the product, not just the principles.
 ## Show your work
 
 - Repo: https://github.com/mayankinkk/slothcart — MIT
-- Built with: `<DEVRAY_SESSION_LINK>` (agent session — full build process)
 - Stack: Python 3.14 stdlib, Ollama, `gemma3:4b` (open weights), 30 unit tests
   (`python3 -m unittest discover -s tests`), Apple M2 / 16 GB
 
