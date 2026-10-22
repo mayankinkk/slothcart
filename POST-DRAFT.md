@@ -22,6 +22,8 @@ staring, remembering, and list-making.
 back an aisle-grouped grocery list, minus anything your `pantry.txt` says you
 already stock. It runs entirely on my M2 laptop with the network cable pulled.
 
+![slothcart demo](https://raw.githubusercontent.com/mayankinkk/slothcart/main/docs/demo.gif)
+
 ## Demo
 
 ```console

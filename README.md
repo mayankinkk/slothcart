@@ -8,6 +8,8 @@ you take one lazy photo, it does the rest. All inference runs on your own machin
 [Ollama](https://ollama.com) and an open-weight vision model. No internet, no API keys,
 no data leaving your kitchen.
 
+![slothcart demo](https://raw.githubusercontent.com/mayankinkk/slothcart/main/docs/demo.gif)
+
 ```
 $ slothcart examples/fridge.jpg --pantry examples/pantry.txt --save-list list.md
 Reading fridge.jpg with gemma3:4b (local, offline)...
