@@ -117,7 +117,8 @@ without changing a line of code. Slow and steady.
 **1. It runs with no internet.** Ollama on `127.0.0.1:11434` is the only endpoint
 in the codebase. Airplane mode, cabin weekend, flaky village Wi-Fi — same command,
 same result. A closed vision API makes a grocery list impossible precisely when
-you're most off-grid.
+you're most off-grid. Even the iPhone HEIC photo from my camera roll gets
+converted to JPEG locally (macOS `sips`) before the model sees it.
 
 **2. My fridge stays my fridge.** A fridge photo is a surprisingly intimate
 document: what you eat, what you buy, when you're home. With closed APIs, every
@@ -148,7 +149,7 @@ wins the product, not just the principles.
 
 - Repo: https://github.com/mayankinkk/slothcart — MIT
 - Built with: `<DEVRAY_SESSION_LINK>` (agent session — full build process)
-- Stack: Python 3.14 stdlib, Ollama, `gemma3:4b` (open weights), 25 unit tests
+- Stack: Python 3.14 stdlib, Ollama, `gemma3:4b` (open weights), 30 unit tests
   (`python3 -m unittest discover -s tests`), Apple M2 / 16 GB
 
 ```bash

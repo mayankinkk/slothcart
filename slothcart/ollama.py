@@ -1,6 +1,9 @@
 import base64
 import json
 import os
+import shutil
+import subprocess
+import tempfile
 import urllib.error
 import urllib.request
 
@@ -26,9 +29,54 @@ class OllamaError(RuntimeError):
     pass
 
 
+def _sniff(head):
+    if head.startswith(b"\xff\xd8\xff"):
+        return "jpeg"
+    if head.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if head.startswith((b"GIF87a", b"GIF89a")):
+        return "gif"
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+        return "webp"
+    return None
+
+
+def _convert_to_jpeg(path):
+    sips = shutil.which("sips")
+    if not sips:
+        raise OllamaError(
+            f"{path} is not a JPEG/PNG/GIF/WebP image and no converter is available. "
+            "Convert it to JPEG first (Ollama only accepts those formats)."
+        )
+    fd, tmp = tempfile.mkstemp(suffix=".jpg")
+    os.close(fd)
+    try:
+        proc = subprocess.run(
+            [sips, "-s", "format", "jpeg", path, "--out", tmp],
+            capture_output=True,
+            text=True,
+        )
+        if proc.returncode != 0 or not os.path.getsize(tmp):
+            detail = (proc.stderr or proc.stdout or "").strip()
+            raise OllamaError(f"Could not convert {path} to JPEG: {detail}")
+        with open(tmp, "rb") as f:
+            return f.read()
+    finally:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+
+
 def encode_image(path):
     with open(path, "rb") as f:
-        return base64.b64encode(f.read()).decode("ascii")
+        head = f.read(16)
+        if _sniff(head):
+            f.seek(0)
+            data = f.read()
+        else:
+            data = _convert_to_jpeg(path)
+    return base64.b64encode(data).decode("ascii")
 
 
 def ask(model, prompt, image_b64, host=DEFAULT_HOST):

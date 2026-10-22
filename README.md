@@ -117,6 +117,8 @@ slothcart fridge.jpg --save-inventory inv.json --inventory-only
 ## Offline by design
 
 - Talks only to `http://127.0.0.1:11434` — pull the ethernet cable and it still works.
+- iPhone HEIC photos are converted to JPEG locally with macOS `sips` before the model
+  ever sees them — still never leaving your machine.
 - Your fridge photos never leave your machine (you can see exactly where they go: `slothcart/ollama.py`).
 - No API keys, no per-call cost, no rate limits. Install once, run forever.
 - Swap the model with `--model` whenever you want — bigger at home, smaller on a laptop.
@@ -136,8 +138,9 @@ runs best on my hardware. Full write-up in [POST-DRAFT.md](POST-DRAFT.md).
 python3 -m unittest discover -s tests
 ```
 
-25 tests covering JSON extraction, pantry matching (incl. "eggplant" vs "egg"),
-diet filters, grouping order, rendering, and CLI error paths.
+30 tests covering JSON extraction, pantry matching (incl. "eggplant" vs "egg"),
+diet filters, grouping order, rendering, CLI error paths, and image-format
+handling (incl. HEIC conversion).
 
 ## Credits
 

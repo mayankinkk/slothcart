@@ -1,6 +1,13 @@
+import base64
 import json
+import os
+import shutil
+import struct
+import subprocess
 import sys
+import tempfile
 import unittest
+import zlib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -15,7 +22,7 @@ from slothcart.grocery import (
     render_markdown,
     render_text,
 )
-from slothcart.ollama import extract_json
+from slothcart.ollama import OllamaError, _sniff, encode_image, extract_json
 
 
 def item(name, category="pantry", quantity="1"):
@@ -133,6 +140,73 @@ class TestRendering(unittest.TestCase):
         items = [item("soda", "drinks"), item("apple", "produce"), item("x", "other")]
         cats = [c for c, _ in group(items)]
         self.assertEqual(cats, ["produce", "drinks", "other"])
+
+
+def make_png():
+    def chunk(tag, data):
+        return (
+            struct.pack(">I", len(data))
+            + tag
+            + data
+            + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+        )
+
+    ihdr = struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0)
+    idat = zlib.compress(b"\x00\x00\x00\x00\xff")
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", idat) + chunk(b"IEND", b"")
+
+
+class TestImageFormats(unittest.TestCase):
+    def test_sniff_supported_formats(self):
+        self.assertEqual(_sniff(b"\xff\xd8\xff\xe0rest"), "jpeg")
+        self.assertEqual(_sniff(b"\x89PNG\r\n\x1a\n"), "png")
+        self.assertEqual(_sniff(b"GIF89a...."), "gif")
+        self.assertEqual(_sniff(b"RIFF\x00\x00\x00\x00WEBP"), "webp")
+
+    def test_sniff_heic_returns_none(self):
+        heic = b"\x00\x00\x00\x18ftypheic\x00\x00\x00\x00"
+        self.assertIsNone(_sniff(heic))
+
+    def test_encode_png_untouched(self):
+        png = make_png()
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+            f.write(png)
+            path = f.name
+        try:
+            self.assertEqual(base64.b64decode(encode_image(path)), png)
+        finally:
+            os.unlink(path)
+
+    def test_garbage_file_raises_ollama_error(self):
+        with tempfile.NamedTemporaryFile(suffix=".bin", delete=False) as f:
+            f.write(b"definitely not an image")
+            path = f.name
+        try:
+            with self.assertRaises(OllamaError):
+                encode_image(path)
+        finally:
+            os.unlink(path)
+
+    @unittest.skipUnless(shutil.which("sips"), "sips is macOS-only")
+    def test_heic_converts_to_jpeg(self):
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+            f.write(make_png())
+            png_path = f.name
+        heic_path = png_path + ".heic"
+        try:
+            subprocess.run(
+                ["sips", "-s", "format", "heic", png_path, "--out", heic_path],
+                capture_output=True,
+                check=True,
+            )
+            with open(heic_path, "rb") as f:
+                self.assertIsNone(_sniff(f.read(16)))
+            data = base64.b64decode(encode_image(heic_path))
+            self.assertEqual(_sniff(data[:16]), "jpeg")
+        finally:
+            for p in (png_path, heic_path):
+                if os.path.exists(p):
+                    os.unlink(p)
 
 
 class TestCliOffline(unittest.TestCase):
